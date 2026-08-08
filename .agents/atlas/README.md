@@ -6,25 +6,26 @@ The actual implementation of the convention — plans, progress notes,
 specs, project summaries, and scratch space — lives in `atlas/`. Think of
 `atlas` as the map of the project: it's where an agent goes to find out
 what exists (`topics/`) and to lay out where things are headed (`plans/`).
+The skill that enforces the convention lives in `skills/`.
 
 ## Layout
 
 ```
 .agents/
-├── README.md                  # this file
+├── skills/
+│   └── agent-docs/
+│       └── SKILL.md       # Claude Code skill that enforces this convention
 └── atlas/
+    ├── README.md          # this file — the convention itself
     ├── plans/
-    │   └── NN/                # one directory per plan, zero-padded number
-    │       ├── PLAN.md        # the plan itself
+    │   └── NN/            # one directory per plan, zero-padded number
+    │       ├── PLAN.md    # the plan itself
     │       ├── PROGRESS.md    # MUST be updated at the end of every task
     │       ├── specs/*.md     # specs for long tasks (see below)
     │       └── *.md           # other supporting material for this plan
     ├── topics/
-    │   └── NN-name.md         # durable project summaries, one per topic
-    ├── tmp/                   # scratch space for temporary/in-progress files
-    └── skills/
-        └── agent-docs/
-            └── SKILL.md       # Claude Code skill that enforces this convention
+    │   └── NN-name.md     # durable project summaries, one per topic
+    └── tmp/               # scratch space for temporary/in-progress files
 ```
 
 ## Rules

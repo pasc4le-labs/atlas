@@ -5,7 +5,7 @@ agents to persist plans, progress, and project summaries across
 sessions. This repo holds no project content; it's the scaffold you
 copy elsewhere.
 
-Includes a Claude Code skill (`.agents/atlas/skills/agent-docs/`) that
+Includes a Claude Code skill (`.agents/skills/agent-docs/`) that
 enforces the convention's MUST-do rules: plan before working, update
 `PROGRESS.md` after every task, and update `topics/` after every plan.
 
@@ -13,11 +13,11 @@ enforces the convention's MUST-do rules: plan before working, update
 
 ```bash
 cp -r .agents /path/to/new-project/.agents
-ln -s .agents/atlas /path/to/new-project/.claude
+ln -s .agents /path/to/new-project/.claude
 ```
 
-See [`.agents/README.md`](.agents/README.md) for the convention itself, and
-[`.agents/atlas/skills/agent-docs/SKILL.md`](.agents/atlas/skills/agent-docs/SKILL.md)
+See [`.agents/atlas/README.md`](.agents/atlas/README.md) for the convention itself, and
+[`.agents/skills/agent-docs/SKILL.md`](.agents/skills/agent-docs/SKILL.md)
 for the skill that enforces it.
 
 ## Badge
