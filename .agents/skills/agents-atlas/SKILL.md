@@ -1,9 +1,9 @@
 ---
-name: agent-docs
-description: Use whenever a repository has an .agents/atlas/ directory (plans/, topics/, tmp/) — the agent-docs convention for persisting plans, progress, and project summaries across sessions. Load this BEFORE starting any new work (must read topics/ and write a plan first), immediately AFTER finishing each task (must update PROGRESS.md), and immediately AFTER completing a plan (must update topics/). Also use when asked to set up, adopt, or bootstrap this convention in a new project.
+name: agents-atlas
+description: Use whenever a repository has an .agents/atlas/ directory (plans/, topics/, tmp/) — the agents-atlas convention for persisting plans, progress, and project summaries across sessions. Load this BEFORE starting any new work (must read topics/ and write a plan first), immediately AFTER finishing each task (must update PROGRESS.md), and immediately AFTER completing a plan (must update topics/). Also use when asked to set up, adopt, or bootstrap this convention in a new project.
 ---
 
-# Agent docs (.agents/atlas/) convention
+# Agents-atlas (.agents/atlas/) convention
 
 This project persists agent work in `.agents/atlas/`. The full rules live
 in `.agents/atlas/README.md` — treat that file as canonical if it
@@ -13,7 +13,7 @@ MUST-do actions actually happen, since they're easy to skip mid-task.
 If `.agents/` doesn't exist yet in this project, bootstrap it by copying
 the whole `.agents/` directory from the `atlas` template repo rather
 than inventing a new layout. Symlink `.claude` to `.agents` so Claude
-Code discovers the skill at `.claude/skills/agent-docs/`.
+Code discovers the skill at `.claude/skills/agents-atlas/`.
 
 ## 1. Plan first — read topics, then write the plan
 
