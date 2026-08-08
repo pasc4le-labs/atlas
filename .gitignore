@@ -1,0 +1,2 @@
+.agents/atlas/tmp/*
+!.agents/atlas/tmp/.gitkeep
