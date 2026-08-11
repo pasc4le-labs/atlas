@@ -12,8 +12,8 @@ enforces the convention's MUST-do rules: plan before working, update
 ## Usage
 
 ```bash
-npx @pasc4le-labs/init-atlas            # install into current directory
-npx @pasc4le-labs/init-atlas ../proj    # install into another directory
+npx @pasc4le-labs/atlas            # install into current directory
+npx @pasc4le-labs/atlas ../proj    # install into another directory
 ```
 
 This copies the `.agents/` scaffold into the target project and symlinks
