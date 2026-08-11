@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const BIN = path.join(__dirname, '..', 'bin', 'atlas-scaffold.js');
+const BIN = path.join(__dirname, '..', 'bin', 'init-atlas.js');
 const ROOT = path.join(__dirname, '..');
 
 let failures = 0;
@@ -90,7 +90,7 @@ function makeTmp(prefix) {
 {
   const help = run(['--help'], ROOT);
   check('--help exits 0', help.status === 0);
-  check('--help shows usage', /npx atlas-scaffold/.test(help.stdout), help.stdout);
+  check('--help shows usage', /npx @pasc4le-labs\/init-atlas/.test(help.stdout), help.stdout);
   const ver = run(['--version'], ROOT);
   check('--version prints semver', /^\d+\.\d+\.\d+/.test(ver.stdout.trim()), ver.stdout);
 }

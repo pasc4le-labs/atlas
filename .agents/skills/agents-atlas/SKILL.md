@@ -11,8 +11,8 @@ conflicts with anything below. This skill exists to make sure the three
 MUST-do actions actually happen, since they're easy to skip mid-task.
 
 If `.agents/` doesn't exist yet in this project, bootstrap it with
-`npx atlas-scaffold` (copies the whole `.agents/` directory from the
-`atlas` template package and symlinks `.claude` → `.agents`) rather than
+`npx @pasc4le-labs/init-atlas` (copies the whole `.agents/` directory from
+the `atlas` template package and symlinks `.claude` → `.agents`) rather than
 inventing a new layout. That makes Claude Code discover the skill at
 `.claude/skills/agents-atlas/`.
 
