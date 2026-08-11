@@ -20,7 +20,7 @@ Options:
   -f, --force       overwrite existing files without asking
   -y, --yes         assume yes for all confirmation prompts
   -q, --quiet       suppress success output (warnings/errors still shown)
-      --no-link     do not link .claude to .agents
+      --claude      link .claude -> .agents (Claude Code skill discovery)
       --copy-claude copy .claude instead of linking (last resort)
   -v, --version     print version
   -h, --help        show this help
@@ -49,7 +49,7 @@ function parseArgs(argv) {
     force: false,
     yes: false,
     quiet: false,
-    link: true,
+    link: false,
     copyClaude: false,
   };
   for (const arg of argv) {
@@ -76,11 +76,12 @@ function parseArgs(argv) {
       case '--quiet':
         opts.quiet = true;
         break;
-      case '--no-link':
-        opts.link = false;
+      case '--claude':
+        opts.link = true;
         break;
       case '--copy-claude':
         opts.copyClaude = true;
+        opts.link = true;
         break;
       default:
         if (arg.startsWith('-')) fail(`unknown option: ${arg}`);
@@ -194,6 +195,9 @@ async function main(argv) {
     console.log();
     console.log(`${green('Done')}. agents-atlas convention installed in ${bold(targetDir)}`);
     console.log(`Next: read ${dim('.agents/atlas/README.md')}, then create ${dim('.agents/atlas/plans/01/PLAN.md')} before starting work.`);
+    if (!opts.link) {
+      console.log(dim('Tip: add --claude to link .claude -> .agents for Claude Code.'));
+    }
   }
 }
 

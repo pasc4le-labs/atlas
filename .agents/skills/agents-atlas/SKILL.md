@@ -12,9 +12,9 @@ MUST-do actions actually happen, since they're easy to skip mid-task.
 
 If `.agents/` doesn't exist yet in this project, bootstrap it with
 `npx init-atlas` (copies the whole `.agents/` directory from the `atlas`
-template package and symlinks `.claude` → `.agents`) rather than
-inventing a new layout. That makes Claude Code discover the skill at
-`.claude/skills/agents-atlas/`.
+template package) rather than inventing a new layout. Run it with
+`--claude` to link `.claude` → `.agents`, which makes Claude Code
+discover the skill at `.claude/skills/agents-atlas/`.
 
 ## 1. Plan first: read topics, then write the plan
 

@@ -27,20 +27,30 @@ function makeTmp(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `atlas-scaffold-${prefix}-`));
 }
 
-// 1. fresh install into an empty dir
+// 1. fresh install into an empty dir: no .claude by default
 {
   const dir = makeTmp('fresh');
   const res = run([dir], ROOT);
   check('fresh install exits 0', res.status === 0, res.stderr);
   check('.agents/atlas/README.md copied', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
   check('skill copied', fs.existsSync(path.join(dir, '.agents', 'skills', 'agents-atlas', 'SKILL.md')));
+  check('.claude NOT created by default', !fs.existsSync(path.join(dir, '.claude')));
+  check('output marks created', /atlas .*created/.test(res.stdout), res.stdout);
+  check('tip mentions --claude', /--claude/.test(res.stdout), res.stdout);
+}
+
+// 2. --claude links .claude -> .agents
+{
+  const dir = makeTmp('claude');
+  const res = run([dir, '--claude'], ROOT);
+  check('--claude exits 0', res.status === 0, res.stderr);
   const st = fs.lstatSync(path.join(dir, '.claude'));
   check('.claude is a symlink', st.isSymbolicLink());
   check('.claude points at .agents', fs.readlinkSync(path.join(dir, '.claude')) === '.agents');
-  check('output marks created', /atlas .*created/.test(res.stdout), res.stdout);
+  check('output marks linked', /linked/.test(res.stdout), res.stdout);
 }
 
-// 2. existing non-empty .agents is merged, unrelated files preserved
+// 3. existing non-empty .agents is merged, unrelated files preserved
 {
   const dir = makeTmp('merge');
   fs.mkdirSync(path.join(dir, '.agents'), { recursive: true });
@@ -52,7 +62,7 @@ function makeTmp(prefix) {
   check('atlas created alongside', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
 }
 
-// 3. existing atlas, non-interactive: declined, left untouched, warns
+// 4. existing atlas, non-interactive: declined, left untouched, warns
 {
   const dir = makeTmp('decline');
   fs.mkdirSync(path.join(dir, '.agents', 'atlas'), { recursive: true });
@@ -64,7 +74,7 @@ function makeTmp(prefix) {
   check('warning printed', /already present/.test(res.stderr), res.stderr);
 }
 
-// 4. existing atlas + --force: overwritten
+// 5. existing atlas + --force: overwritten
 {
   const dir = makeTmp('force');
   fs.mkdirSync(path.join(dir, '.agents', 'atlas'), { recursive: true });
@@ -75,7 +85,7 @@ function makeTmp(prefix) {
   check('template restored', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
 }
 
-// 5. existing skill + --yes: overwritten without prompt
+// 6. existing skill + --yes: overwritten without prompt
 {
   const dir = makeTmp('yes');
   fs.mkdirSync(path.join(dir, '.agents', 'skills', 'agents-atlas'), { recursive: true });
@@ -86,24 +96,26 @@ function makeTmp(prefix) {
   check('stale skill marker gone', !fs.existsSync(path.join(dir, '.agents', 'skills', 'agents-atlas', 'marker.txt')));
 }
 
-// 6. existing .claude without --force: left untouched
+// 7. existing .claude is never touched by default
 {
-  const dir = makeTmp('claude');
+  const dir = makeTmp('claude-preserve');
   fs.writeFileSync(path.join(dir, '.claude'), 'real file');
   const res = run([dir], ROOT);
   check('existing .claude exits 0', res.status === 0, res.stderr);
-  check('.claude untouched', fs.readFileSync(path.join(dir, '.claude'), 'utf8') === 'real file');
+  check('.claude untouched by default', fs.readFileSync(path.join(dir, '.claude'), 'utf8') === 'real file');
 }
 
-// 7. --no-link skips .claude
+// 8. existing .claude + --claude --force: replaced
 {
-  const dir = makeTmp('nolink');
-  const res = run([dir, '--no-link'], ROOT);
-  check('--no-link exits 0', res.status === 0, res.stderr);
-  check('.claude not created', !fs.existsSync(path.join(dir, '.claude')));
+  const dir = makeTmp('claude-force');
+  fs.writeFileSync(path.join(dir, '.claude'), 'real file');
+  const res = run([dir, '--claude', '--force'], ROOT);
+  check('--claude --force exits 0', res.status === 0, res.stderr);
+  const st = fs.lstatSync(path.join(dir, '.claude'));
+  check('.claude replaced with symlink', st.isSymbolicLink());
 }
 
-// 8. --copy-claude copies instead of symlinking
+// 9. --copy-claude implies linking, copies instead of symlinking
 {
   const dir = makeTmp('copyclaude');
   const res = run([dir, '--copy-claude'], ROOT);
@@ -112,7 +124,7 @@ function makeTmp(prefix) {
   check('.claude is a real dir (copy)', !st.isSymbolicLink() && st.isDirectory());
 }
 
-// 9. --quiet: no stdout on success
+// 10. --quiet: no stdout on success
 {
   const dir = makeTmp('quiet');
   const res = run([dir, '--quiet'], ROOT);
@@ -121,7 +133,7 @@ function makeTmp(prefix) {
   check('files still installed', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
 }
 
-// 10. default target = cwd
+// 11. default target = cwd
 {
   const dir = makeTmp('cwd');
   const res = run([], dir);
@@ -129,7 +141,7 @@ function makeTmp(prefix) {
   check('.agents created in cwd', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
 }
 
-// 11. help + version + unknown option
+// 12. help + version + unknown option
 {
   const help = run(['--help'], ROOT);
   check('--help exits 0', help.status === 0);

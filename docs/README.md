@@ -26,8 +26,9 @@ Running `npx init-atlas` in a project creates:
     └── tmp/               # scratch space (git-ignored)
 ```
 
-Plus a `.claude` symlink pointing at `.agents`, so Claude Code discovers the
-skill at `.claude/skills/agents-atlas/`.
+By default nothing else is touched. With `--claude`, a `.claude` link
+points at `.agents` so Claude Code discovers the skill at
+`.claude/skills/agents-atlas/` (a symlink on POSIX, a junction on Windows).
 
 `.agents/` is for agents only, not user-facing documentation. User-facing
 docs stay in the root `README.md` and `docs/`.
@@ -86,8 +87,8 @@ and creates the `.claude` symlink.
 | `npx init-atlas ../proj --force` | Overwrite existing atlas/skill without asking |
 | `npx init-atlas --yes` | Assume yes for all confirmation prompts |
 | `npx init-atlas --quiet` | Suppress success output |
-| `npx init-atlas --no-link` | Skip the `.claude` symlink |
-| `npx init-atlas --copy-claude` | Copy `.claude` instead of symlinking |
+| `npx init-atlas --claude` | Also link `.claude` → `.agents` for Claude Code |
+| `npx init-atlas --copy-claude` | Copy `.claude` instead of linking (with `--claude`) |
 | `npx init-atlas --help` | Show help |
 | `npx init-atlas --version` | Show version |
 
@@ -99,9 +100,10 @@ and creates the `.claude` symlink.
 - If `atlas/` or the skill already exists, the CLI warns and asks for
   confirmation before overwriting. In non-interactive contexts (piped,
   CI) it declines unless `--force` or `--yes` is passed.
-- `.claude` is linked to `.agents`: a symlink on POSIX, a junction on
-  Windows (the native directory link, no admin or Developer Mode needed).
-  `--copy-claude` falls back to a real copy as a last resort.
+- `.claude` is not created by default. `--claude` links it to `.agents`
+  (symlink on POSIX, junction on Windows; `--copy-claude` forces a real
+  copy as a last resort). This is the extra step for teams that want
+  Claude Code to enforce the convention.
 - **Git symlinks are the cross-platform standard.** A symlink is stored in
   git as a blob holding the target path (mode `120000`) with a relative
   target, and every OS checks it out the same way. The only exception is
