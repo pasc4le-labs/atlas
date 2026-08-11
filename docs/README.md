@@ -83,11 +83,26 @@ and creates the `.claude` symlink.
 | --- | --- |
 | `npx init-atlas` | Install into the current directory |
 | `npx init-atlas ../proj` | Install into another directory |
-| `npx init-atlas ../proj --force` | Replace an existing `.agents/` |
+| `npx init-atlas ../proj --force` | Overwrite existing atlas/skill without asking |
+| `npx init-atlas --yes` | Assume yes for all confirmation prompts |
+| `npx init-atlas --quiet` | Suppress success output |
 | `npx init-atlas --no-link` | Skip the `.claude` symlink |
 | `npx init-atlas --copy-claude` | Copy `.claude` instead of symlinking |
 | `npx init-atlas --help` | Show help |
 | `npx init-atlas --version` | Show version |
+
+## Behavior
+
+- The scaffold is merged into `.agents/`: `atlas/` and
+  `skills/agents-atlas/` are created alongside anything already there.
+  Existing unrelated files are never removed.
+- If `atlas/` or the skill already exists, the CLI warns and asks for
+  confirmation before overwriting. In non-interactive contexts (piped,
+  CI) it declines unless `--force` or `--yes` is passed.
+- `.claude` is symlinked to `.agents` unless `--no-link`; `--copy-claude`
+  copies instead (the Windows fallback).
+- The default run is quiet by default: no prompts, no per-file noise,
+  just a short summary. `--quiet` suppresses even that.
 
 Notes:
 

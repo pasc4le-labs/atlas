@@ -13,11 +13,17 @@ npx init-atlas ../proj      # install into another project
 
 Also published as `@pasc4le-labs/atlas`.
 
+Safe to run on a project that already has a `.agents/` directory: the
+scaffold merges in and existing files are never removed unless you confirm
+an overwrite.
+
 ## Options
 
 | Option | Description |
 | --- | --- |
-| `--force` | Overwrite an existing `.agents/` |
+| `--force` | Overwrite existing `atlas/` or skill without asking |
+| `--yes` | Assume yes for all confirmation prompts |
+| `--quiet` | Suppress success output |
 | `--no-link` | Skip the `.claude` symlink |
 | `--copy-claude` | Copy `.claude` instead of symlinking (Windows) |
 

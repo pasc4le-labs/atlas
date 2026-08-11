@@ -27,40 +27,75 @@ function makeTmp(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `atlas-scaffold-${prefix}-`));
 }
 
-// 1. fresh install into a temp dir
+// 1. fresh install into an empty dir
 {
-  const dir = makeTmp('install');
+  const dir = makeTmp('fresh');
   const res = run([dir], ROOT);
   check('fresh install exits 0', res.status === 0, res.stderr);
   check('.agents/atlas/README.md copied', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
-  check('.agents/skills/agents-atlas/SKILL.md copied', fs.existsSync(path.join(dir, '.agents', 'skills', 'agents-atlas', 'SKILL.md')));
+  check('skill copied', fs.existsSync(path.join(dir, '.agents', 'skills', 'agents-atlas', 'SKILL.md')));
   const st = fs.lstatSync(path.join(dir, '.claude'));
-  check('.claude is a symlink', st.isSymbolicLink(), JSON.stringify(st));
-  check('.claude points at .agents', fs.readlinkSync(path.join(dir, '.claude')) === '.agents', fs.readlinkSync(path.join(dir, '.claude')));
-  check('tmp scratch is present', fs.existsSync(path.join(dir, '.agents', 'atlas', 'tmp', '.gitkeep')));
+  check('.claude is a symlink', st.isSymbolicLink());
+  check('.claude points at .agents', fs.readlinkSync(path.join(dir, '.claude')) === '.agents');
+  check('output marks created', /atlas .*created/.test(res.stdout), res.stdout);
 }
 
-// 2. existing .agents without --force -> error
+// 2. existing non-empty .agents is merged, unrelated files preserved
 {
-  const dir = makeTmp('existing');
+  const dir = makeTmp('merge');
   fs.mkdirSync(path.join(dir, '.agents'), { recursive: true });
+  fs.mkdirSync(path.join(dir, '.agents', 'plans'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.agents', 'plans', 'keep.txt'), 'mine');
   const res = run([dir], ROOT);
-  check('existing .agents aborts without --force', res.status !== 0, `status=${res.status}`);
-  check('error message mentions --force', /--force/.test(res.stderr), res.stderr);
+  check('merge into existing .agents exits 0', res.status === 0, res.stderr);
+  check('unrelated file preserved', fs.readFileSync(path.join(dir, '.agents', 'plans', 'keep.txt'), 'utf8') === 'mine');
+  check('atlas created alongside', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
 }
 
-// 3. --force replaces existing .agents and keeps .claude intact
+// 3. existing atlas, non-interactive: declined, left untouched, warns
+{
+  const dir = makeTmp('decline');
+  fs.mkdirSync(path.join(dir, '.agents', 'atlas'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.agents', 'atlas', 'marker.txt'), 'keep me');
+  const res = run([dir], ROOT);
+  check('declined overwrite exits 0', res.status === 0, res.stderr);
+  check('existing atlas untouched', fs.readFileSync(path.join(dir, '.agents', 'atlas', 'marker.txt'), 'utf8') === 'keep me');
+  check('no template files added', !fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
+  check('warning printed', /already present/.test(res.stderr), res.stderr);
+}
+
+// 4. existing atlas + --force: overwritten
 {
   const dir = makeTmp('force');
-  fs.mkdirSync(path.join(dir, '.agents'), { recursive: true });
-  fs.writeFileSync(path.join(dir, '.agents', 'stale.txt'), 'stale');
+  fs.mkdirSync(path.join(dir, '.agents', 'atlas'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.agents', 'atlas', 'marker.txt'), 'stale');
   const res = run([dir, '--force'], ROOT);
   check('--force exits 0', res.status === 0, res.stderr);
-  check('stale content gone', !fs.existsSync(path.join(dir, '.agents', 'stale.txt')));
-  check('scaffold restored', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
+  check('stale marker gone', !fs.existsSync(path.join(dir, '.agents', 'atlas', 'marker.txt')));
+  check('template restored', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
 }
 
-// 4. --no-link skips .claude
+// 5. existing skill + --yes: overwritten without prompt
+{
+  const dir = makeTmp('yes');
+  fs.mkdirSync(path.join(dir, '.agents', 'skills', 'agents-atlas'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.agents', 'skills', 'agents-atlas', 'marker.txt'), 'stale');
+  const res = run([dir, '--yes'], ROOT);
+  check('--yes exits 0', res.status === 0, res.stderr);
+  check('skill overwritten', fs.existsSync(path.join(dir, '.agents', 'skills', 'agents-atlas', 'SKILL.md')));
+  check('stale skill marker gone', !fs.existsSync(path.join(dir, '.agents', 'skills', 'agents-atlas', 'marker.txt')));
+}
+
+// 6. existing .claude without --force: left untouched
+{
+  const dir = makeTmp('claude');
+  fs.writeFileSync(path.join(dir, '.claude'), 'real file');
+  const res = run([dir], ROOT);
+  check('existing .claude exits 0', res.status === 0, res.stderr);
+  check('.claude untouched', fs.readFileSync(path.join(dir, '.claude'), 'utf8') === 'real file');
+}
+
+// 7. --no-link skips .claude
 {
   const dir = makeTmp('nolink');
   const res = run([dir, '--no-link'], ROOT);
@@ -68,17 +103,25 @@ function makeTmp(prefix) {
   check('.claude not created', !fs.existsSync(path.join(dir, '.claude')));
 }
 
-// 5. --copy-claude copies instead of symlinking
+// 8. --copy-claude copies instead of symlinking
 {
   const dir = makeTmp('copyclaude');
   const res = run([dir, '--copy-claude'], ROOT);
   check('--copy-claude exits 0', res.status === 0, res.stderr);
   const st = fs.lstatSync(path.join(dir, '.claude'));
   check('.claude is a real dir (copy)', !st.isSymbolicLink() && st.isDirectory());
-  check('copy contains skill', fs.existsSync(path.join(dir, '.claude', 'skills', 'agents-atlas', 'SKILL.md')));
 }
 
-// 6. default target = cwd
+// 9. --quiet: no stdout on success
+{
+  const dir = makeTmp('quiet');
+  const res = run([dir, '--quiet'], ROOT);
+  check('--quiet exits 0', res.status === 0, res.stderr);
+  check('--quiet prints nothing to stdout', res.stdout.trim() === '', JSON.stringify(res.stdout));
+  check('files still installed', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
+}
+
+// 10. default target = cwd
 {
   const dir = makeTmp('cwd');
   const res = run([], dir);
@@ -86,13 +129,15 @@ function makeTmp(prefix) {
   check('.agents created in cwd', fs.existsSync(path.join(dir, '.agents', 'atlas', 'README.md')));
 }
 
-// 7. help + version
+// 11. help + version + unknown option
 {
   const help = run(['--help'], ROOT);
   check('--help exits 0', help.status === 0);
   check('--help shows usage', help.stdout.includes('npx ' + require(path.join(ROOT, 'package.json')).name), help.stdout);
   const ver = run(['--version'], ROOT);
   check('--version prints semver', /^\d+\.\d+\.\d+/.test(ver.stdout.trim()), ver.stdout);
+  const bad = run(['--bogus'], ROOT);
+  check('unknown option fails', bad.status !== 0);
 }
 
 console.log(failures === 0 ? '\nAll tests passed' : `\n${failures} test(s) failed`);

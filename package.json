@@ -1,6 +1,6 @@
 {
   "name": "init-atlas",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Bootstrap the agents-atlas convention (.agents/ + .claude) into a project. Replaces `cp -r` + `ln -s`.",
   "license": "MIT",
   "author": "Giuseppe Pascale",

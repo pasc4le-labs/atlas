@@ -2,9 +2,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
-const VERSION = require('../package.json').version;
-const PKG_NAME = require('../package.json').name;
+const pkg = require('../package.json');
+const VERSION = pkg.version;
+const PKG_NAME = pkg.name;
 const SCAFFOLD_DIR = path.join(__dirname, '..', '.agents');
 
 const HELP = `atlas: bootstrap the agents-atlas convention into a project
@@ -15,19 +17,29 @@ Usage:
   dir        target project directory (default: current directory)
 
 Options:
-  -f, --force        overwrite an existing .agents/ directory
-  --no-link          do not create the .claude symlink
-  --copy-claude      copy .claude instead of symlinking (Windows fallback)
-  -v, --version      print version
-  -h, --help         show this help
+  -f, --force       overwrite existing files without asking
+  -y, --yes         assume yes for all confirmation prompts
+  -q, --quiet       suppress success output (warnings/errors still shown)
+      --no-link     do not create the .claude symlink
+      --copy-claude copy .claude instead of symlinking (Windows)
+  -v, --version     print version
+  -h, --help        show this help
 
 Examples:
-  npx ${PKG_NAME}                    # install into current directory
-  npx ${PKG_NAME} ../my-project --force
+  npx ${PKG_NAME}                        # install into current directory
+  npx ${PKG_NAME} ../my-project --force  # overwrite existing atlas/skill
 `;
 
+const useColor = process.stdout.isTTY && !process.env.NO_COLOR;
+const paint = (code, s) => (useColor ? `\x1b[${code}m${s}\x1b[0m` : s);
+const green = (s) => paint('32', s);
+const yellow = (s) => paint('33', s);
+const red = (s) => paint('31', s);
+const dim = (s) => paint('2', s);
+const bold = (s) => paint('1', s);
+
 function fail(message) {
-  console.error(`error: ${message}`);
+  console.error(`${red('error')}: ${message}`);
   process.exit(1);
 }
 
@@ -35,6 +47,8 @@ function parseArgs(argv) {
   const opts = {
     dir: null,
     force: false,
+    yes: false,
+    quiet: false,
     link: true,
     copyClaude: false,
   };
@@ -54,6 +68,14 @@ function parseArgs(argv) {
       case '--force':
         opts.force = true;
         break;
+      case '-y':
+      case '--yes':
+        opts.yes = true;
+        break;
+      case '-q':
+      case '--quiet':
+        opts.quiet = true;
+        break;
       case '--no-link':
         opts.link = false;
         break;
@@ -69,37 +91,59 @@ function parseArgs(argv) {
   return opts;
 }
 
-function copyDir(src, dest) {
-  fs.cpSync(src, dest, { recursive: true, force: true });
+function askConfirm(question) {
+  if (!process.stdin.isTTY) return Promise.resolve(false);
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(`${yellow('?')} ${question} [y/N] `, (answer) => {
+      rl.close();
+      resolve(/^y(es)?$/i.test(answer.trim()));
+    });
+  });
 }
 
-function createClaudeLink(targetDir, { force, copyClaude }) {
+async function copyComponent(rel, src, dest, opts, say) {
+  const present = fs.existsSync(dest);
+  if (present && !opts.force && !opts.yes) {
+    const ok = await askConfirm(`${rel} already exists in .agents. Overwrite it?`);
+    if (!ok) {
+      console.warn(`${yellow('!')} ${dim(rel)} already present; left untouched`);
+      return 'skipped';
+    }
+  }
+  if (present) {
+    fs.rmSync(dest, { recursive: true, force: true });
+  }
+  fs.cpSync(src, dest, { recursive: true, force: true });
+  say(`${green('✓')} ${dim(rel)} ${present ? 'updated' : 'created'}`);
+  return present ? 'updated' : 'created';
+}
+
+function linkClaude(targetDir, opts, say) {
   const claudePath = path.join(targetDir, '.claude');
-  const exists = fs.existsSync(claudePath) || fs.lstatSync(claudePath, { throwIfNoEntry: false });
+  const exists = fs.existsSync(claudePath) || Boolean(fs.lstatSync(claudePath, { throwIfNoEntry: false }));
 
   if (exists) {
-    if (!force) {
-      console.warn(`warn: ${path.join(targetDir, '.claude')} already exists; leaving it untouched (use --force to replace)`);
-      return false;
+    if (!opts.force && !opts.yes) {
+      console.warn(`${yellow('!')} ${dim('.claude')} already exists; left untouched (use --force to replace)`);
+      return;
     }
     fs.rmSync(claudePath, { recursive: true, force: true });
   }
 
-  if (copyClaude || process.platform === 'win32') {
-    // Junction on Windows avoids needing admin privileges; copy is the safest fallback.
-    copyDir(path.join(SCAFFOLD_DIR), claudePath);
-    console.log(`+ ${path.join(targetDir, '.claude')} (copied)`);
-    return true;
+  if (opts.copyClaude || process.platform === 'win32') {
+    fs.cpSync(SCAFFOLD_DIR, claudePath, { recursive: true, force: true });
+    say(`${green('✓')} ${dim('.claude')} copied`);
+    return;
   }
-
   fs.symlinkSync('.agents', claudePath, 'dir');
-  console.log(`+ ${path.join(targetDir, '.claude')} -> .agents (symlink)`);
-  return true;
+  say(`${green('✓')} ${dim('.claude')} ${green('->')} ${dim('.agents')} linked`);
 }
 
-function main(argv) {
+async function main(argv) {
   const opts = parseArgs(argv);
   const targetDir = path.resolve(opts.dir || '.');
+  const say = (msg) => { if (!opts.quiet) console.log(msg); };
 
   if (!fs.existsSync(SCAFFOLD_DIR)) {
     fail('internal error: scaffold payload (.agents) missing from package');
@@ -111,24 +155,40 @@ function main(argv) {
     fail(`target is not a directory: ${targetDir}`);
   }
 
-  const agentsPath = path.join(targetDir, '.agents');
-  if (fs.existsSync(agentsPath)) {
-    if (!opts.force) {
-      fail(`${agentsPath} already exists; rerun with --force to overwrite`);
-    }
-    fs.rmSync(agentsPath, { recursive: true, force: true });
-    console.log(`~ ${agentsPath} (replaced)`);
-  }
+  const agentsDir = path.join(targetDir, '.agents');
+  fs.mkdirSync(agentsDir, { recursive: true });
 
-  copyDir(SCAFFOLD_DIR, agentsPath);
-  console.log(`+ ${agentsPath}`);
+  const components = [
+    {
+      rel: '.agents/atlas',
+      src: path.join(SCAFFOLD_DIR, 'atlas'),
+      dest: path.join(agentsDir, 'atlas'),
+    },
+    {
+      rel: '.agents/skills/agents-atlas',
+      src: path.join(SCAFFOLD_DIR, 'skills', 'agents-atlas'),
+      dest: path.join(agentsDir, 'skills', 'agents-atlas'),
+    },
+  ];
+
+  const results = [];
+  for (const c of components) {
+    results.push(await copyComponent(c.rel, c.src, c.dest, opts, say));
+  }
 
   if (opts.link) {
-    createClaudeLink(targetDir, { force: opts.force, copyClaude: opts.copyClaude });
+    linkClaude(targetDir, opts, say);
   }
 
-  console.log(`\nDone. agents-atlas convention installed in ${targetDir}`);
-  console.log('Next: read .agents/atlas/README.md, then create .agents/atlas/plans/01/PLAN.md before starting work.');
+  if (!opts.quiet) {
+    console.log();
+    console.log(`${green('Done')}. agents-atlas convention installed in ${bold(targetDir)}`);
+    console.log(`Next: read ${dim('.agents/atlas/README.md')}, then create ${dim('.agents/atlas/plans/01/PLAN.md')} before starting work.`);
+  }
 }
 
 module.exports = { main, parseArgs };
+
+if (require.main === module) {
+  main(process.argv.slice(2)).catch((err) => fail(err.message));
+}
