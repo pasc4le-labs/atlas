@@ -13,7 +13,7 @@ The skill that enforces the convention lives in `skills/`.
 ```
 .agents/
 ├── skills/
-│   └── agents-atlas/
+│   └── atlas/
 │       └── SKILL.md       # Claude Code skill that enforces this convention
 └── atlas/
     ├── README.md          # this file (the convention itself)

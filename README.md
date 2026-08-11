@@ -2,31 +2,32 @@
 
 Scaffold the **agents-atlas convention** into any project. It gives agents
 a fixed place to persist plans, progress, and project summaries across
-sessions (`.agents/`), with a Claude Code skill you can opt into via
-`--claude`.
+sessions. The installer asks where the convention should live and offers
+to install the Claude Code skill via the skills CLI.
 
 ## Install
 
 ```bash
-npx init-atlas              # install into current directory
+npx init-atlas              # interactive: pick a location, install skill
 npx init-atlas ../proj      # install into another project
 ```
 
 Also published as `@pasc4le-labs/atlas`.
 
 Safe to run on a project that already has a `.agents/` directory: the
-scaffold merges in and existing files are never removed unless you confirm
+installer merges in and existing files are never removed unless you confirm
 an overwrite.
 
 ## Options
 
 | Option | Description |
 | --- | --- |
-| `--force` | Overwrite existing `atlas/` or skill without asking |
+| `--dest <path>` | Install to a specific path (skips the selector) |
+| `--no-skill` | Skip the skill install prompt |
+| `--with-skill` | Run the skill install without asking |
+| `--force` | Overwrite existing files without asking |
 | `--yes` | Assume yes for all confirmation prompts |
 | `--quiet` | Suppress success output |
-| `--claude` | Link `.claude` → `.agents` (Claude Code skill discovery) |
-| `--copy-claude` | Copy `.claude` instead of linking (with `--claude`, last resort) |
 
 ## Docs
 

@@ -6,32 +6,45 @@ scaffolder (`npx init-atlas`) installs it into any project in one command.
 
 ## What gets installed
 
-Running `npx init-atlas` in a project creates:
+Running `npx init-atlas` in a project is interactive: pick where the
+atlas convention should live, then choose whether to install the skill
+with the skills CLI. The atlas component looks like this:
 
 ```
-.agents/
-├── skills/
-│   └── agents-atlas/
-│       └── SKILL.md       # Claude Code skill that enforces this convention
-└── atlas/
-    ├── README.md          # the convention itself (agents only)
-    ├── plans/
-    │   └── NN/            # one directory per plan, zero-padded number
-    │       ├── PLAN.md    # the plan itself
-    │       ├── PROGRESS.md    # MUST be updated at the end of every task
-    │       ├── specs/*.md     # specs for long tasks
-    │       └── *.md           # other supporting material
-    ├── topics/
-    │   └── NN-name.md     # durable project summaries, one per topic
-    └── tmp/               # scratch space (git-ignored)
+<dest>/                 # e.g. .agents/atlas, .atlas, .claude/agents, ...
+├── README.md           # the convention itself (agents only)
+├── plans/
+│   └── NN/             # one directory per plan, zero-padded number
+│       ├── PLAN.md     # the plan itself
+│       ├── PROGRESS.md # MUST be updated at the end of every task
+│       ├── specs/*.md  # specs for long tasks
+│       └── *.md        # other supporting material
+├── topics/
+│   └── NN-name.md      # durable project summaries, one per topic
+└── tmp/                # scratch space (git-ignored)
 ```
 
-By default nothing else is touched. With `--claude`, a `.claude` link
-points at `.agents` so Claude Code discovers the skill at
-`.claude/skills/agents-atlas/` (a symlink on POSIX, a junction on Windows).
+Suggested destinations (arrow-key selector, `Custom path` supported):
 
-`.agents/` is for agents only, not user-facing documentation. User-facing
-docs stay in the root `README.md` and `docs/`.
+| Destination | Use case |
+| --- | --- |
+| `.agents/atlas` | inside the agents convention (default) |
+| `.atlas` | top-level project dir |
+| `.claude/agents` | Claude Code dir |
+| `.codex/atlas` | Codex CLI dir |
+| `.docs/` | docs location |
+| `.ai/` | AI working dir |
+| `.config/atlas` | config location |
+
+The skill is installed separately with the skills CLI (Vercel Labs), which
+auto-detects your agents and routes it to the right place:
+
+```bash
+npx skills add https://github.com/pasc4le-labs/atlas/tree/main/.agents/skills/atlas
+```
+
+The convention dir is for agents only, not user-facing documentation.
+User-facing docs stay in the root `README.md` and `docs/`.
 
 ## Convention rules
 
@@ -77,50 +90,38 @@ docs stay in the root `README.md` and `docs/`.
 
 ## CLI reference
 
-`npx init-atlas` copies the `.agents/` scaffold into the target directory
-and creates the `.claude` symlink.
+`npx init-atlas` walks you through the install interactively: destination
+selector, overwrite confirmations, and the skill install prompt.
 
 | Command | Effect |
 | --- | --- |
-| `npx init-atlas` | Install into the current directory |
+| `npx init-atlas` | Interactive install into the current directory |
 | `npx init-atlas ../proj` | Install into another directory |
-| `npx init-atlas ../proj --force` | Overwrite existing atlas/skill without asking |
+| `npx init-atlas --dest .atlas` | Skip the selector, install to a specific path |
+| `npx init-atlas --no-skill` | Skip the skill prompt entirely |
+| `npx init-atlas --with-skill` | Run the skill install without asking |
+| `npx init-atlas --force` | Overwrite existing files without asking |
 | `npx init-atlas --yes` | Assume yes for all confirmation prompts |
 | `npx init-atlas --quiet` | Suppress success output |
-| `npx init-atlas --claude` | Also link `.claude` → `.agents` for Claude Code |
-| `npx init-atlas --copy-claude` | Copy `.claude` instead of linking (with `--claude`) |
 | `npx init-atlas --help` | Show help |
 | `npx init-atlas --version` | Show version |
 
 ## Behavior
 
-- The scaffold is merged into `.agents/`: `atlas/` and
-  `skills/agents-atlas/` are created alongside anything already there.
-  Existing unrelated files are never removed.
-- If `atlas/` or the skill already exists, the CLI warns and asks for
-  confirmation before overwriting. In non-interactive contexts (piped,
-  CI) it declines unless `--force` or `--yes` is passed.
-- `.claude` is not created by default. `--claude` links it to `.agents`
-  (symlink on POSIX, junction on Windows; `--copy-claude` forces a real
-  copy as a last resort). This is the extra step for teams that want
-  Claude Code to enforce the convention.
-- **Git symlinks are the cross-platform standard.** A symlink is stored in
-  git as a blob holding the target path (mode `120000`) with a relative
-  target, and every OS checks it out the same way. The only exception is
-  Windows: with `core.symlinks=false` (Git for Windows default) a committed
-  link materializes as a plain text file containing the target path. To get
-  real links on Windows, enable Developer Mode and set
-  `git config --global core.symlinks true`.
-- The default run is quiet by default: no prompts, no per-file noise,
-  just a short summary. `--quiet` suppresses even that.
-
-Notes:
-
-- `--copy-claude` is the safe fallback on Windows, where symlinks need
-  elevated privileges.
-- The CLI has zero dependencies; the package is ~6 kB.
-- Help text derives the command from the package name, so the scoped alias
-  `@pasc4le-labs/atlas` shows the correct invocation.
+- The install is interactive when run in a terminal: an arrow-key
+  selector asks where the atlas convention should live (`.agents/atlas`,
+  `.atlas`, `.claude/agents`, `.codex/atlas`, `.docs/`, `.ai/`,
+  `.config/atlas`, or a custom path), then asks whether to install the
+  skill now with the skills CLI, print the command, or skip.
+- In non-interactive contexts (piped, CI), the default destination is
+  `.agents/atlas`, the skill command is printed, and nothing is prompted.
+- If the destination already exists, the CLI warns and asks for
+  confirmation before overwriting. Existing unrelated files are never
+  removed; only the atlas dir itself is replaced on confirmation.
+- The skill itself is installed via `npx skills` (Vercel Labs CLI). It
+  auto-detects your agents (Claude Code, Codex, Cursor, ...) and routes
+  the skill to the right directory. Choose "Print command" to run it
+  yourself later.
 
 ## Publishing
 

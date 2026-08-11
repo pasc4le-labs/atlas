@@ -1,5 +1,5 @@
 ---
-name: agents-atlas
+name: atlas
 description: Use whenever a repository has an .agents/atlas/ directory (plans/, topics/, tmp/); the agents-atlas convention for persisting plans, progress, and project summaries across sessions. Load this BEFORE starting any new work (must read topics/ and write a plan first), immediately AFTER finishing each task (must update PROGRESS.md), and immediately AFTER completing a plan (must update topics/). Also use when asked to set up, adopt, or bootstrap this convention in a new project.
 ---
 
@@ -11,10 +11,9 @@ conflicts with anything below. This skill exists to make sure the three
 MUST-do actions actually happen, since they're easy to skip mid-task.
 
 If `.agents/` doesn't exist yet in this project, bootstrap it with
-`npx init-atlas` (copies the whole `.agents/` directory from the `atlas`
-template package) rather than inventing a new layout. Run it with
-`--claude` to link `.claude` → `.agents`, which makes Claude Code
-discover the skill at `.claude/skills/agents-atlas/`.
+`npx init-atlas`. The installer asks where the atlas dir should live and
+offers to install this skill with the skills CLI
+(`npx skills add https://github.com/pasc4le-labs/atlas/tree/main/.agents/skills/atlas`).
 
 ## 1. Plan first: read topics, then write the plan
 
