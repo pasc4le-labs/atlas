@@ -7,7 +7,7 @@ const VERSION = require('../package.json').version;
 const PKG_NAME = require('../package.json').name;
 const SCAFFOLD_DIR = path.join(__dirname, '..', '.agents');
 
-const HELP = `atlas — bootstrap the agents-atlas convention into a project
+const HELP = `atlas: bootstrap the agents-atlas convention into a project
 
 Usage:
   npx ${PKG_NAME} [dir] [options]
@@ -79,7 +79,7 @@ function createClaudeLink(targetDir, { force, copyClaude }) {
 
   if (exists) {
     if (!force) {
-      console.warn(`warn: ${path.join(targetDir, '.claude')} already exists — leaving it untouched (use --force to replace)`);
+      console.warn(`warn: ${path.join(targetDir, '.claude')} already exists; leaving it untouched (use --force to replace)`);
       return false;
     }
     fs.rmSync(claudePath, { recursive: true, force: true });
@@ -114,7 +114,7 @@ function main(argv) {
   const agentsPath = path.join(targetDir, '.agents');
   if (fs.existsSync(agentsPath)) {
     if (!opts.force) {
-      fail(`${agentsPath} already exists — rerun with --force to overwrite`);
+      fail(`${agentsPath} already exists; rerun with --force to overwrite`);
     }
     fs.rmSync(agentsPath, { recursive: true, force: true });
     console.log(`~ ${agentsPath} (replaced)`);
