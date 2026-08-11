@@ -90,7 +90,7 @@ function makeTmp(prefix) {
 {
   const help = run(['--help'], ROOT);
   check('--help exits 0', help.status === 0);
-  check('--help shows usage', /npx @pasc4le-labs\/atlas/.test(help.stdout), help.stdout);
+  check('--help shows usage', help.stdout.includes('npx ' + require(path.join(ROOT, 'package.json')).name), help.stdout);
   const ver = run(['--version'], ROOT);
   check('--version prints semver', /^\d+\.\d+\.\d+/.test(ver.stdout.trim()), ver.stdout);
 }

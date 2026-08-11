@@ -16,6 +16,12 @@ npx @pasc4le-labs/atlas            # install into current directory
 npx @pasc4le-labs/atlas ../proj    # install into another directory
 ```
 
+The same package is also published unscoped, as a shorter alias:
+
+```bash
+npx init-atlas                     # identical behavior
+```
+
 This copies the `.agents/` scaffold into the target project and symlinks
 `.claude` → `.agents` so Claude Code discovers the skill at
 `.claude/skills/agents-atlas/`.

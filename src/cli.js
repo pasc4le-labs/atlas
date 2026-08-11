@@ -4,12 +4,13 @@ const fs = require('fs');
 const path = require('path');
 
 const VERSION = require('../package.json').version;
+const PKG_NAME = require('../package.json').name;
 const SCAFFOLD_DIR = path.join(__dirname, '..', '.agents');
 
 const HELP = `atlas — bootstrap the agents-atlas convention into a project
 
 Usage:
-  npx @pasc4le-labs/atlas [dir] [options]
+  npx ${PKG_NAME} [dir] [options]
 
   dir        target project directory (default: current directory)
 
@@ -21,8 +22,8 @@ Options:
   -h, --help         show this help
 
 Examples:
-  npx @pasc4le-labs/atlas                    # install into current directory
-  npx @pasc4le-labs/atlas ../my-project --force
+  npx ${PKG_NAME}                    # install into current directory
+  npx ${PKG_NAME} ../my-project --force
 `;
 
 function fail(message) {
