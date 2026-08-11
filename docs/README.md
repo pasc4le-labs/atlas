@@ -99,8 +99,16 @@ and creates the `.claude` symlink.
 - If `atlas/` or the skill already exists, the CLI warns and asks for
   confirmation before overwriting. In non-interactive contexts (piped,
   CI) it declines unless `--force` or `--yes` is passed.
-- `.claude` is symlinked to `.agents` unless `--no-link`; `--copy-claude`
-  copies instead (the Windows fallback).
+- `.claude` is linked to `.agents`: a symlink on POSIX, a junction on
+  Windows (the native directory link, no admin or Developer Mode needed).
+  `--copy-claude` falls back to a real copy as a last resort.
+- **Git symlinks are the cross-platform standard.** A symlink is stored in
+  git as a blob holding the target path (mode `120000`) with a relative
+  target, and every OS checks it out the same way. The only exception is
+  Windows: with `core.symlinks=false` (Git for Windows default) a committed
+  link materializes as a plain text file containing the target path. To get
+  real links on Windows, enable Developer Mode and set
+  `git config --global core.symlinks true`.
 - The default run is quiet by default: no prompts, no per-file noise,
   just a short summary. `--quiet` suppresses even that.
 

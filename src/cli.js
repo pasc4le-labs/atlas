@@ -20,8 +20,8 @@ Options:
   -f, --force       overwrite existing files without asking
   -y, --yes         assume yes for all confirmation prompts
   -q, --quiet       suppress success output (warnings/errors still shown)
-      --no-link     do not create the .claude symlink
-      --copy-claude copy .claude instead of symlinking (Windows)
+      --no-link     do not link .claude to .agents
+      --copy-claude copy .claude instead of linking (last resort)
   -v, --version     print version
   -h, --help        show this help
 
@@ -131,11 +131,21 @@ function linkClaude(targetDir, opts, say) {
     fs.rmSync(claudePath, { recursive: true, force: true });
   }
 
-  if (opts.copyClaude || process.platform === 'win32') {
+  if (opts.copyClaude) {
     fs.cpSync(SCAFFOLD_DIR, claudePath, { recursive: true, force: true });
     say(`${green('✓')} ${dim('.claude')} copied`);
     return;
   }
+
+  if (process.platform === 'win32') {
+    // Junction: the Windows-native directory link. Works without admin or
+    // Developer Mode and is transparent to applications, so Claude Code
+    // follows it exactly like a symlink.
+    fs.symlinkSync(path.resolve(targetDir, '.agents'), claudePath, 'junction');
+    say(`${green('✓')} ${dim('.claude')} ${green('->')} ${dim('.agents')} junction`);
+    return;
+  }
+
   fs.symlinkSync('.agents', claudePath, 'dir');
   say(`${green('✓')} ${dim('.claude')} ${green('->')} ${dim('.agents')} linked`);
 }

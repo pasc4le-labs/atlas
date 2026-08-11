@@ -25,7 +25,7 @@ an overwrite.
 | `--yes` | Assume yes for all confirmation prompts |
 | `--quiet` | Suppress success output |
 | `--no-link` | Skip the `.claude` symlink |
-| `--copy-claude` | Copy `.claude` instead of symlinking (Windows) |
+| `--copy-claude` | Copy `.claude` instead of symlinking/junction (last resort) |
 
 ## Docs
 
