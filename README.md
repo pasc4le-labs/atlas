@@ -12,14 +12,14 @@ enforces the convention's MUST-do rules: plan before working, update
 ## Usage
 
 ```bash
-npx @pasc4le-labs/atlas            # install into current directory
-npx @pasc4le-labs/atlas ../proj    # install into another directory
+npx init-atlas                   # install into current directory
+npx init-atlas ../proj           # install into another directory
 ```
 
-The same package is also published unscoped, as a shorter alias:
+The same package is also published under the org scope, as an alias:
 
 ```bash
-npx init-atlas                     # identical behavior
+npx @pasc4le-labs/atlas          # identical behavior
 ```
 
 This copies the `.agents/` scaffold into the target project and symlinks

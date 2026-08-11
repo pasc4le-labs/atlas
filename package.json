@@ -1,13 +1,13 @@
 {
-  "name": "@pasc4le-labs/atlas",
-  "version": "1.0.0",
+  "name": "init-atlas",
+  "version": "1.0.1",
   "description": "Bootstrap the agents-atlas convention (.agents/ + .claude) into a project — replaces `cp -r` + `ln -s`.",
   "license": "MIT",
   "author": "Giuseppe Pascale",
   "type": "commonjs",
   "main": "src/cli.js",
   "bin": {
-    "atlas": "bin/atlas.js"
+    "init-atlas": "bin/atlas.js"
   },
   "files": [
     "bin",
