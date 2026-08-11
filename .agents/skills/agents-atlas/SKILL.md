@@ -10,10 +10,11 @@ in `.agents/atlas/README.md` — treat that file as canonical if it
 conflicts with anything below. This skill exists to make sure the three
 MUST-do actions actually happen, since they're easy to skip mid-task.
 
-If `.agents/` doesn't exist yet in this project, bootstrap it by copying
-the whole `.agents/` directory from the `atlas` template repo rather
-than inventing a new layout. Symlink `.claude` to `.agents` so Claude
-Code discovers the skill at `.claude/skills/agents-atlas/`.
+If `.agents/` doesn't exist yet in this project, bootstrap it with
+`npx atlas-scaffold` (copies the whole `.agents/` directory from the
+`atlas` template package and symlinks `.claude` → `.agents`) rather than
+inventing a new layout. That makes Claude Code discover the skill at
+`.claude/skills/agents-atlas/`.
 
 ## 1. Plan first — read topics, then write the plan
 

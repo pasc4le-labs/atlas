@@ -1,0 +1,35 @@
+{
+  "name": "atlas-scaffold",
+  "version": "1.0.0",
+  "description": "Bootstrap the agents-atlas convention (.agents/ + .claude) into a project — replaces `cp -r` + `ln -s`.",
+  "license": "MIT",
+  "author": "Giuseppe Pascale",
+  "type": "commonjs",
+  "main": "src/cli.js",
+  "bin": {
+    "atlas-scaffold": "bin/atlas-scaffold.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    ".agents",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "atlas",
+    "agents",
+    "scaffold",
+    "claude",
+    "claude-code",
+    "convention",
+    "plans",
+    "progress"
+  ],
+  "scripts": {
+    "test": "node test/run.js"
+  }
+}

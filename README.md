@@ -12,6 +12,19 @@ enforces the convention's MUST-do rules: plan before working, update
 ## Usage
 
 ```bash
+npx atlas-scaffold            # install into current directory
+npx atlas-scaffold ../proj    # install into another directory
+```
+
+This copies the `.agents/` scaffold into the target project and symlinks
+`.claude` → `.agents` so Claude Code discovers the skill at
+`.claude/skills/agents-atlas/`.
+
+Options: `--force` (overwrite an existing `.agents/`), `--no-link` (skip the
+`.claude` symlink), `--copy-claude` (copy instead of symlink — Windows
+fallback). The old manual method still works if you prefer it:
+
+```bash
 cp -r .agents /path/to/new-project/.agents
 ln -s .agents /path/to/new-project/.claude
 ```
