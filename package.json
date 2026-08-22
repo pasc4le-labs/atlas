@@ -1,9 +1,17 @@
 {
   "name": "init-atlas",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Bootstrap the agents-atlas convention (.agents/) into a project. Replaces `cp -r` + `ln -s`.",
   "license": "MIT",
   "author": "Giuseppe Pascale",
+  "homepage": "https://github.com/pasc4le-labs/atlas",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pasc4le-labs/atlas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pasc4le-labs/atlas/issues"
+  },
   "type": "commonjs",
   "main": "src/cli.js",
   "bin": {

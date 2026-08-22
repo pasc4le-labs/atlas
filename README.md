@@ -5,6 +5,8 @@ a fixed place to persist plans, progress, and project summaries across
 sessions. The installer asks where the convention should live and offers
 to install the Claude Code skill via the skills CLI.
 
+**Source / issues:** [github.com/pasc4le-labs/atlas](https://github.com/pasc4le-labs/atlas)
+
 ## Install
 
 ```bash
