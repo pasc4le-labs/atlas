@@ -1,6 +1,6 @@
 ---
 name: atlas
-description: Use whenever a repository has an .agents/atlas/ directory (plans/, topics/, tmp/); the agents-atlas convention for persisting plans, progress, and project summaries across sessions. Load this BEFORE starting any new work (must read topics/ and write a plan first), immediately AFTER finishing each task (must update PROGRESS.md), and immediately AFTER completing a plan (must update topics/). Also use when asked to set up, adopt, or bootstrap this convention in a new project.
+description: Use whenever a repository has an .agents/atlas/ directory (plans/, topics/, tmp/); the agents-atlas convention for persisting plans, progress, and project summaries across sessions. Load this BEFORE starting any new work (must read topics/ and write a plan first), immediately AFTER finishing each task (must update PROGRESS.md), and immediately AFTER completing a plan (must update topics/, archive the plan into plans/PAST.md, and remove the plan dir). Also use when asked to set up, adopt, or bootstrap this convention in a new project.
 ---
 
 # Agents-atlas (.agents/atlas/) convention
@@ -59,7 +59,27 @@ keys, new invariants, updated status/roadmap. Topics describe **what
 exists now**; if you close out a plan without touching topics, the next
 agent's "read topics first" step will hand out stale information.
 
-## 4. Commit as you go
+## 4. Archive finished plans → PAST.md, then remove the plan dir
+
+When a plan is fully complete and its topics are updated, fold it into
+`.agents/atlas/plans/PAST.md` and delete the plan directory:
+
+1. Read the current contents of `.agents/atlas/plans/PAST.md`.
+2. Prepend a short entry for the finished plan at the top: plan number,
+   title, one-line summary of what changed, completion date. A tight
+   paragraph or a few bullets — never the full PLAN.md.
+3. **Never let `PAST.md` exceed ~2,000 tokens** (~8 KB / ~1,000 words).
+   If the new entry pushes it over the cap, drop the oldest (bottom)
+   entries until it fits. Keep the recent history; trim the oldest.
+4. **Remove the finished plan's directory** `.agents/atlas/plans/NN/`
+   (PLAN.md, PROGRESS.md, specs) once its summary is safe in PAST.md.
+   Don't leave completed plan dirs lying around.
+5. Commit the PAST.md update and the plan-dir removal together.
+
+Long-lived detail still belongs in `topics/` (step 3); PAST.md is a
+living index of what was done, kept under the token cap.
+
+## 5. Commit as you go
 
 Everything under `.agents/` is tracked in git **except
 `.agents/atlas/tmp/`**, which is git-ignored disposable scratch space.

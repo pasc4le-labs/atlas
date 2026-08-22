@@ -28,7 +28,7 @@ function makeTmp(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `atlas-init-${prefix}-`));
 }
 
-const ATLAS_MARKERS = ['README.md', 'plans/.gitkeep', 'topics/.gitkeep', 'tmp/.gitkeep'];
+const ATLAS_MARKERS = ['README.md', 'plans/PAST.md', 'plans/.gitkeep', 'topics/.gitkeep', 'tmp/.gitkeep'];
 
 function atlasInstalled(dir) {
   return ATLAS_MARKERS.every((m) => fs.existsSync(path.join(dir, m)));

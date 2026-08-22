@@ -14,7 +14,8 @@ with the skills CLI. The atlas component looks like this:
 <dest>/                 # e.g. .agents/atlas, .atlas, .claude/agents, ...
 ├── README.md           # the convention itself (agents only)
 ├── plans/
-│   └── NN/             # one directory per plan, zero-padded number
+│   ├── PAST.md         # rolling archive of finished plans (cap ~2k tokens)
+│   └── NN/             # one directory per active plan, zero-padded number
 │       ├── PLAN.md     # the plan itself
 │       ├── PROGRESS.md # MUST be updated at the end of every task
 │       ├── specs/*.md  # specs for long tasks
@@ -60,6 +61,15 @@ User-facing docs stay in the root `README.md` and `docs/`.
 - Every plan directory must contain `plans/NN/PROGRESS.md`.
 - `PROGRESS.md` must be updated at the end of every task. Never leave it
   stale after finishing a task.
+
+### Rolling archive
+
+- `plans/PAST.md` is the rolling archive of finished plans. When a plan
+  completes: read `PAST.md`, prepend a short entry for the finished plan
+  (number, title, one-line summary, date), and **never let the file exceed
+  ~2,000 tokens** (~8 KB) — drop the oldest (bottom) entries if needed.
+- Then **remove the finished plan's directory** `plans/NN/` (PLAN.md,
+  PROGRESS.md, specs). Its summary now lives in PAST.md.
 
 ### Topics
 
