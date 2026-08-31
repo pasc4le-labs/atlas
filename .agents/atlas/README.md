@@ -18,12 +18,12 @@ The skill that enforces the convention lives in `skills/`.
 └── atlas/
     ├── README.md          # this file (the convention itself)
     ├── plans/
-    │   ├── PAST.md         # rolling archive of finished plans (cap ~2k tokens)
-    │   └── NN/             # one directory per active plan, zero-padded number
-    │       ├── PLAN.md     # the plan itself
-    │       ├── PROGRESS.md # MUST be updated at the end of every task
-    │       ├── specs/*.md  # specs for long tasks (see below)
-    │       └── *.md        # other supporting material for this plan
+    │   ├── NN/             # one directory per ACTIVE plan, zero-padded number
+    │   │   ├── PLAN.md     # the plan itself
+    │   │   ├── PROGRESS.md # MUST be updated at the end of every task
+    │   │   ├── specs/*.md  # specs for long tasks (see below)
+    │   │   └── *.md        # other supporting material for this plan
+    │   └── XX.md           # tombstone: finished plan (see "Finished plans")
     ├── topics/
     │   └── NN-name.md     # durable project summaries, one per topic
     └── tmp/               # scratch space for temporary/in-progress files
@@ -42,24 +42,15 @@ The skill that enforces the convention lives in `skills/`.
 - `PROGRESS.md` **must be updated at the end of each task**; never leave it
   stale after finishing a task.
 
-### Rolling archive → PAST.md
+### Finished plans → replace the folder with a short XX.md
 
-- `atlas/plans/PAST.md` is the **rolling archive of finished plans**. When a
-  plan completes, fold it into `PAST.md` and remove the plan dir:
-  1. Read the current contents of `plans/PAST.md`.
-  2. Prepend a short entry for the finished plan at the top: plan number,
-     title, one-line summary of what changed, and completion date. Keep it
-     tight — a finished plan gets a paragraph or a few bullets, not the
-     full PLAN.md.
-  3. **Never let `PAST.md` exceed ~2,000 tokens** (~8 KB / ~1,000 words).
-     If the new entry pushes it over, drop the **oldest (bottom) entries**
-     until it fits under the cap. Trim oldest-first; the most recent
-     plans are what the next agent needs.
-  4. **Remove the finished plan's directory `plans/NN/`** (PLAN.md,
-     PROGRESS.md, specs) once its summary is safe in PAST.md.
-- `PAST.md` is a living index, not a full archive: long-lived detail
-  still belongs in `topics/`. Only the fact that a plan was done + a short
-  summary goes into PAST.md.
+- When a plan is **fully complete AND shipped**, collapse the whole
+  `atlas/plans/NN/` directory into a single `atlas/plans/XX.md` (XX = the plan
+  number, e.g. `atlas/plans/01.md`) holding a VERY SHORT description of what the
+  plan did — a few sentences or bullets, never the full PLAN.md. Then remove the
+  plan's directory and commit.
+- Long-lived detail still belongs in `topics/`. The XX.md is a tidy tombstone so
+  a finished plan doesn't leave a sprawling folder behind.
 
 ### Topics
 

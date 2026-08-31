@@ -14,12 +14,12 @@ with the skills CLI. The atlas component looks like this:
 <dest>/                 # e.g. .agents/atlas, .atlas, .claude/agents, ...
 ├── README.md           # the convention itself (agents only)
 ├── plans/
-│   ├── PAST.md         # rolling archive of finished plans (cap ~2k tokens)
-│   └── NN/             # one directory per active plan, zero-padded number
-│       ├── PLAN.md     # the plan itself
-│       ├── PROGRESS.md # MUST be updated at the end of every task
-│       ├── specs/*.md  # specs for long tasks
-│       └── *.md        # other supporting material
+    │   ├── NN/             # one directory per ACTIVE plan, zero-padded number
+    │   │   ├── PLAN.md     # the plan itself
+    │   │   ├── PROGRESS.md # MUST be updated at the end of every task
+    │   │   ├── specs/*.md  # specs for long tasks
+    │   │   └── *.md        # other supporting material
+    │   └── XX.md           # tombstone: finished plan (see "Finished plans")
 ├── topics/
 │   └── NN-name.md      # durable project summaries, one per topic
 └── tmp/                # scratch space (git-ignored)
@@ -62,14 +62,16 @@ User-facing docs stay in the root `README.md` and `docs/`.
 - `PROGRESS.md` must be updated at the end of every task. Never leave it
   stale after finishing a task.
 
-### Rolling archive
+### Finished plans
 
-- `plans/PAST.md` is the rolling archive of finished plans. When a plan
-  completes: read `PAST.md`, prepend a short entry for the finished plan
-  (number, title, one-line summary, date), and **never let the file exceed
-  ~2,000 tokens** (~8 KB) — drop the oldest (bottom) entries if needed.
-- Then **remove the finished plan's directory** `plans/NN/` (PLAN.md,
-  PROGRESS.md, specs). Its summary now lives in PAST.md.
+- When a plan is **fully complete AND shipped**, collapse the whole
+  `.agents/atlas/plans/NN/` directory into a single `.agents/atlas/plans/XX.md`
+  (XX = the plan number, e.g. `plans/01.md`) holding a VERY SHORT description of
+  what the plan did — a few sentences or bullets, never the full PLAN.md. Then
+  remove the finished plan's directory `plans/NN/` (PLAN.md, PROGRESS.md,
+  specs) and commit.
+- Long-lived detail still belongs in `topics/`. The XX.md is a tidy tombstone so
+  a finished plan doesn't leave a sprawling folder behind.
 
 ### Topics
 
